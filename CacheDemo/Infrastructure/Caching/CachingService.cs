@@ -7,13 +7,18 @@ namespace CacheDemo.Infrastructure.Caching;
 
 public class CacheService : ICacheService
 {
+    private const int DefaultExpirationInSeconds = 5;
+    private const string ExpirationInSecondsConfigKey = "ExpirationInSeconds";
+
     private static readonly ConcurrentDictionary<string, bool> CachedKeys = new();
     
     private readonly IDistributedCache _distributedCache;
+    private readonly IConfiguration _configuration;
 
-    public CacheService(IDistributedCache distributedCache)
+    public CacheService(IDistributedCache distributedCache, IConfiguration configuration)
     {
         _distributedCache = distributedCache;
+        _configuration = configuration;
     }
 
     public async Task<T?> GetAsync<T>(string cacheKey, CancellationToken cancellationToken = default) where T : class
@@ -80,9 +85,10 @@ public class CacheService : ICacheService
     public async Task SetAsync<T>(string cacheKey, T value, CancellationToken cancellationToken = default) where T : class
     {
         string cacheValue = JsonSerializer.Serialize(value);
+        var expirationInSeconds = _configuration.GetValue<int?>(ExpirationInSecondsConfigKey) ?? DefaultExpirationInSeconds;
 
         var options = new DistributedCacheEntryOptions();
-        options.SetAbsoluteExpiration(TimeSpan.FromSeconds(5));
+        options.SetAbsoluteExpiration(TimeSpan.FromSeconds(expirationInSeconds));
 
         await _distributedCache.SetStringAsync(cacheKey, cacheValue, options, cancellationToken);
 
