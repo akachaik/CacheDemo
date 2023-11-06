@@ -39,7 +39,9 @@ public class CacheService : ICacheService
 
         if (randomValue % 2 == 0)
         {
-            await Task.Delay(2000, cancellationToken);
+            // await Task.Delay(2000, cancellationToken);
+
+            cachedValue = null;
         }
 
         if (cachedValue is not null)
