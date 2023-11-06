@@ -1,5 +1,6 @@
 namespace CacheDemo
 {
+    [ToString]
     public class WeatherForecast
     {
         public DateOnly Date { get; set; }

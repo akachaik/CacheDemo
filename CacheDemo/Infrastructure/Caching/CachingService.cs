@@ -35,15 +35,6 @@ public class CacheService : ICacheService
     {
         T? cachedValue = await GetAsync<T>(cacheKey, cancellationToken);
 
-        var randomValue = Random.Shared.Next(0, 6);
-
-        if (randomValue % 2 == 0)
-        {
-            // await Task.Delay(2000, cancellationToken);
-
-            cachedValue = null;
-        }
-
         if (cachedValue is not null)
         {
             return cachedValue;
@@ -90,7 +81,10 @@ public class CacheService : ICacheService
     {
         string cacheValue = JsonSerializer.Serialize(value);
 
-        await _distributedCache.SetStringAsync(cacheKey, cacheValue, cancellationToken);
+        var options = new DistributedCacheEntryOptions();
+        options.SetAbsoluteExpiration(TimeSpan.FromSeconds(5));
+
+        await _distributedCache.SetStringAsync(cacheKey, cacheValue, options, cancellationToken);
 
         CachedKeys.TryAdd(cacheKey, false);
     }
