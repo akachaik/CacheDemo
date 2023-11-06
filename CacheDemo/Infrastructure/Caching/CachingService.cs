@@ -5,13 +5,13 @@ using System.Text.Json;
 
 namespace CacheDemo.Infrastructure.Caching;
 
-public class CachingService : ICacheService
+public class CacheService : ICacheService
 {
     private static readonly ConcurrentDictionary<string, bool> CachedKeys = new();
     
     private readonly IDistributedCache _distributedCache;
 
-    public CachingService(IDistributedCache distributedCache)
+    public CacheService(IDistributedCache distributedCache)
     {
         _distributedCache = distributedCache;
     }
@@ -34,6 +34,13 @@ public class CachingService : ICacheService
     public async Task<T> GetAsync<T>(string cacheKey, Func<Task<T>> factory, CancellationToken cancellationToken = default) where T : class
     {
         T? cachedValue = await GetAsync<T>(cacheKey, cancellationToken);
+
+        var randomValue = Random.Shared.Next(0, 6);
+
+        if (randomValue % 2 == 0)
+        {
+            await Task.Delay(2000, cancellationToken);
+        }
 
         if (cachedValue is not null)
         {

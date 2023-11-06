@@ -1,4 +1,5 @@
 using CacheDemo.Application.Caching;
+using CacheDemo.Infrastructure.Caching;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +11,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSingleton<ICacheService, ICacheService>();
+
+builder.Services.AddSingleton<ICacheService, CacheService>();
 
 var app = builder.Build();
 
