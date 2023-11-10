@@ -1,5 +1,6 @@
 ﻿using CacheDemo.Application.Caching;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using System.Text.Json;
 
@@ -13,12 +14,12 @@ public class CacheService : ICacheService
     private static readonly ConcurrentDictionary<string, bool> CachedKeys = new();
     
     private readonly IDistributedCache _distributedCache;
-    private readonly IConfiguration _configuration;
+    private readonly CacheSettings _cacheSettings;
 
-    public CacheService(IDistributedCache distributedCache, IConfiguration configuration)
+    public CacheService(IDistributedCache distributedCache, CacheSettings cacheSettings)
     {
         _distributedCache = distributedCache;
-        _configuration = configuration;
+        _cacheSettings = cacheSettings;
     }
 
     public async Task<T?> GetAsync<T>(string cacheKey, CancellationToken cancellationToken = default) where T : class
@@ -85,7 +86,7 @@ public class CacheService : ICacheService
     public async Task SetAsync<T>(string cacheKey, T value, CancellationToken cancellationToken = default) where T : class
     {
         string cacheValue = JsonSerializer.Serialize(value);
-        var expirationInSeconds = _configuration.GetValue<int?>(ExpirationInSecondsConfigKey) ?? DefaultExpirationInSeconds;
+        var expirationInSeconds = _cacheSettings.ExpirationInSeconds ?? DefaultExpirationInSeconds;
 
         var options = new DistributedCacheEntryOptions();
         options.SetAbsoluteExpiration(TimeSpan.FromSeconds(expirationInSeconds));

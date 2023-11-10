@@ -25,8 +25,10 @@ namespace CacheDemo.Controllers
         [HttpGet(Name = "GetWeatherForecast")]
         public async Task<IEnumerable<WeatherForecast>> GetAsync()
         {
-            var result = await _cacheService.GetAsync("weathers", () =>
+            var result = await _cacheService.GetAsync("weathers", async () =>
             {
+
+                await Task.Delay(3000);
 
                 var forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
                 {
@@ -36,7 +38,7 @@ namespace CacheDemo.Controllers
                 })
                 .ToList();
 
-                return Task.FromResult(forecasts);
+                return forecasts;
             });
 
             return result;
